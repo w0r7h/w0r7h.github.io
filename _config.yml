@@ -20,10 +20,10 @@ timezone: Europe/Lisbon
 
 title: w0r7h # the main title
 
-tagline: Here for the lulz.. # it will display as the sub-title
+tagline: Sh0w 4nd 7ell # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
-  A minimal, responsive and feature-rich Jekyll theme for technical writing. #magic___^_^___line
+  Website about cybersecurity and books
 # fill in the protocol & hostname for your site, e.g., 'https://username.github.io'
 url: "https://w0r7h.github.io"
 
