@@ -12,7 +12,6 @@ tags:
 - spool
 - OverlayFS
 - mysql
-author: w0rth
 img_path: "/assets/img/twomillion"
 image:
   path: machine_img.png
