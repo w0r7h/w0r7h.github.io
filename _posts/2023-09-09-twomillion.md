@@ -15,7 +15,7 @@ tags:
 author: w0rth
 img_path: "/assets/img/twomillion"
 image:
-  path: machine_pack.png
+  path: machine_img.png
   alt: twomillion
 date: 2023-09-09 22:41 +0100
 ---
