@@ -19,11 +19,11 @@ image:
 date: 2023-09-09 22:41 +0100
 ---
 
-# Introduction
+## Introduction
 
 TwoMillion is an Easy difficulty Linux box that was released to celebrate reaching 2 million users on HackTheBox. The box features an old version of the HackTheBox platform that includes the old hackable invite code. After hacking the invite code an account can be created on the platform. The account can be used to enumerate various API endpoints, one of which can be used to elevate the user to an Administrator. With administrative access the user can perform a command injection in the admin VPN generation endpoint thus gaining a system shell. An .env file is found to contain database credentials and owed to password re-use the attackers can login as user admin on the box. The system kernel is found to be outdated and CVE-2023-0386 can be used to gain a root shell.
 
-# Recon
+## Recon
 
 It seems like the machine has only two ports available, 22(SSH) and 80(HTTP). 
 
@@ -52,7 +52,7 @@ We perform a directory scan using nikto and gobuster.
 
 Going to the register endpoint found by the scan, it seems like it needs a invite code in order to register. One endpoint found by gobuster /invite, seems a bit peculiar and fits in the situation.
 
-Looking in the Developer console, I notice a javascript function called "makeInviteCode". Using a web tool called de4js(https://lelinhtinh.github.io/de4js/) to deobfuscate the javascript file inviteapi.min.js we get the following:
+Looking in the Developer console, I notice a javascript function called "makeInviteCode". Using a web tool called [de4js](https://lelinhtinh.github.io/de4js/) to deobfuscate the javascript file inviteapi.min.js we get the following:
 
 ```javascript
 function verifyInviteCode(code) {
@@ -112,12 +112,12 @@ After tinkering around the request the final request that change the user to adm
 
 We can see that it is true if we access: `http://2million.htb/api/v1/admin/auth`.
 
-# Foothold
+## Foothold
 
 The endpoint, `/api/v1/admin/vpn/generate`, it's the only one that it seems like interacting with the operating system.
 Why? Because the endpoint generates a vpn for a user and this vpn needs to be saved in the system to be able to work. Another good hint is that we can interact with it.
 
-Trying a few command injections with the (https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits) we get a command injection vulnerability once we had `"username": "admin;ls -la;"`.
+Trying a few [command injections](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits) we get a command injection vulnerability once we had `"username": "admin;ls -la;"`.
 
 ![](burp_rce.png)
 
@@ -134,7 +134,7 @@ Lets see what users do we have by looking at the passwd file.
 
 /etc/passwd file:
 
-```
+```bash
 root:x:0:0:root:/root:/bin/bash
 daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 bin:x:2:2:bin:/bin:/usr/sbin/nologin
@@ -187,7 +187,7 @@ We get a SHEELL!
 To get all the files used by the application we used the command: `scp -r  admin@10.10.11.221:/var/www/html/ .`
 Looking at how the command injection is done the following line is when we send the request with the username payload: ` exec("/bin/bash /var/www/html/VPN/gen.sh $user", $output, $return_var);`
 
-## Database
+### Database
 
 We know that a database is running supporting the application. Lets see if the database has useful informations.
 To connect to it, use the following commands:
@@ -215,15 +215,15 @@ Users table is the most important and has the following users:
 
 Since we didnt get any additional information, lets run linpeas!
 
-# Privilege Escalation
-
-## Linpeas Scan
+## Privilege Escalation
 
 Linpeas is a very common tool to find ways to do privilege escalation. Running it in the target machine we found a peculiar thing in the report. This finding is the presence of a file in the spool directory.
 
+```
 ╔══════════╣ Mails (limit 50)
 271      4 -rw-r--r--   1 admin    admin         540 Jun  2 23:20 /var/mail/admin
 271      4 -rw-r--r--   1 admin    admin         540 Jun  2 23:20 /var/spool/mail/admin
+```
 
 The files have the following text:
 
@@ -244,10 +244,10 @@ HTB Godfather
 
 ```
 
-## Vulnerability
+### Vulnerability
 
-The vulnerability in question is CVE-2023-0386 (https://securitylabs.datadoghq.com/articles/overlayfs-cve-2023-0386/).
-In order to exploit this vulnerability we have forked a poc(https://github.com/w0r7h/CVE-2023-0386).
+The vulnerability in question is [CVE-2023-0386](https://securitylabs.datadoghq.com/articles/overlayfs-cve-2023-0386/).
+In order to exploit this vulnerability we have forked a [poc](https://github.com/w0r7h/CVE-2023-0386).
 Just compile all the files, zip it and send to the target machine.
 
 Then run the steps presented in the poc README and we get root.
