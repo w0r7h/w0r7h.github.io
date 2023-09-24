@@ -1,6 +1,6 @@
 ---
 layout: post
-title: footprinting_ftp
+title: Footprinting - FTP
 categories:
 - Information
 tags:

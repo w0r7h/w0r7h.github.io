@@ -1,6 +1,6 @@
 ---
 layout: post
-title: footprinting_dns
+title: Footprinting - DNS
 categories:
 - Information
 tags:

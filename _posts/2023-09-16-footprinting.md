@@ -1,6 +1,6 @@
 ---
 layout: post
-title: footprinting
+title: Footprinting
 categories:
 - Information
 tags:

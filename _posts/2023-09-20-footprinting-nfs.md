@@ -1,6 +1,6 @@
 ---
 layout: post
-title: footprinting_nfs
+title: Footprinting - NFS
 categories:
 - Information
 tags:

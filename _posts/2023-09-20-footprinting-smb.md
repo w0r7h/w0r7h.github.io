@@ -1,6 +1,6 @@
 ---
 layout: post
-title: footprinting_smb
+title: Footprinting - SMB
 categories:
 - Information
 tags:
