@@ -169,4 +169,125 @@ $TTL 86400
 
 ## Zone Transfers
 
-A DNS failure usually has severe consequences for a company, the zone file is almost invariably kept identical on several name servers.
+A DNS failure usually has severe consequences for a company, the zone file is almost invariably kept identical on several name servers. When changes are made, it must be ensured that all servers have the same data. Synchronization between the servers involved is realized by zone transfer. Using a secret key rndc-key, which we have seen initially in the default configuration, the servers make sure that they communicate with their own master or slave.
+
+The original data of a zone is located on a DNS server, which is called the primary name server for this zone. However, to increase the reliability, realize a simple load distribution, or protect the primary from attacks, one or more additional servers are installed in practice in almost all cases, which are called secondary name servers for this zone. DNS entries are generally only created, modified, or deleted on the primary.
+
+A DNS server that serves as a direct source for synchronizing a zone file is called a master. A DNS server that obtains zone data from a master is called a slave. A primary is always a master, while a secondary can be both a slave and a master.
+
+## Subdomain Brute Force
+
+To find subdomains it is common to use bruteforce using hostnames. To do this, we need a list of possible hostnames, which we use to send the requests in order. Such lists are provided, for example, by [SecLists](https://github.com/danielmiessler/SecLists/blob/master/Discovery/DNS/subdomains-top1million-5000.txt).
+
+Tools such as [DNSenum](https://github.com/fwaeytens/dnsenum) can help to gather information about subdomains.
+
+```shell
+dnsenum --dnsserver 10.129.14.128 --enum -p 0 -s 0 -o subdomains.txt -f /opt/useful/SecLists/Discovery/DNS/subdomains-top1million-110000.txt inlanefreight.htb
+```
+
+## Challenge
+
+```
+dnsenum --dnsserver 10.129.3.15 --enum -p 0 -s 0 -o subdomains.txt -f ~/SecLists/Discovery/DNS/subdomains-top1million-110000.txt inlanefreight.htb
+
+Interact with the target DNS using its IP address and enumerate the FQDN of it for the "inlanefreight.htb" domain: ns.inlanefreight.htb 
+
+dig axfr inlanefreight.htb @10.129.3.15 #We do a zone transfer
+
+ <<>> DiG 9.18.16-1~deb12u1~bpo11+1-Debian <<>> axfr inlanefreight.htb @10.129.3.15
+;; global options: +cmd
+inlanefreight.htb.	604800	IN	SOA	inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+inlanefreight.htb.	604800	IN	TXT	"MS=ms97310371"
+inlanefreight.htb.	604800	IN	TXT	"atlassian-domain-verification=t1rKCy68JFszSdCKVpw64A1QksWdXuYFUeSXKU"
+inlanefreight.htb.	604800	IN	TXT	"v=spf1 include:mailgun.org include:_spf.google.com include:spf.protection.outlook.com include:_spf.atlassian.net ip4:10.129.124.8 ip4:10.129.127.2 ip4:10.129.42.106 ~all"
+inlanefreight.htb.	604800	IN	NS	ns.inlanefreight.htb.
+app.inlanefreight.htb.	604800	IN	A	10.129.18.15
+dev.inlanefreight.htb.	604800	IN	A	10.12.0.1
+internal.inlanefreight.htb. 604800 IN	A	10.129.1.6
+mail1.inlanefreight.htb. 604800	IN	A	10.129.18.201
+ns.inlanefreight.htb.	604800	IN	A	127.0.0.1
+inlanefreight.htb.	604800	IN	SOA	inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+;; Query time: 93 msec
+;; SERVER: 10.129.3.15#53(10.129.3.15) (TCP)
+;; WHEN: Thu Sep 21 17:55:45 WEST 2023
+;; XFR size: 11 records (messages 1, bytes 560)
+
+
+dig axfr internal.inlanefreight.htb @10.129.3.15 #Then try every other domain for zone transfer and internal.inlanefreight.htb did work
+
+; <<>> DiG 9.18.16-1~deb12u1~bpo11+1-Debian <<>> axfr internal.inlanefreight.htb @10.129.3.15
+;; global options: +cmd
+internal.inlanefreight.htb. 604800 IN	SOA	inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+internal.inlanefreight.htb. 604800 IN	TXT	"MS=ms97310371"
+internal.inlanefreight.htb. 604800 IN	TXT	"HTB{DN5_z0N3_7r4N5F3r_iskdufhcnlu34}"
+internal.inlanefreight.htb. 604800 IN	TXT	"atlassian-domain-verification=t1rKCy68JFszSdCKVpw64A1QksWdXuYFUeSXKU"
+internal.inlanefreight.htb. 604800 IN	TXT	"v=spf1 include:mailgun.org include:_spf.google.com include:spf.protection.outlook.com include:_spf.atlassian.net ip4:10.129.124.8 ip4:10.129.127.2 ip4:10.129.42.106 ~all"
+internal.inlanefreight.htb. 604800 IN	NS	ns.inlanefreight.htb.
+dc1.internal.inlanefreight.htb.	604800 IN A	10.129.34.16
+dc2.internal.inlanefreight.htb.	604800 IN A	10.129.34.11
+mail1.internal.inlanefreight.htb. 604800 IN A	10.129.18.200
+ns.internal.inlanefreight.htb. 604800 IN A	127.0.0.1
+vpn.internal.inlanefreight.htb.	604800 IN A	10.129.1.6
+ws1.internal.inlanefreight.htb.	604800 IN A	10.129.1.34
+ws2.internal.inlanefreight.htb.	604800 IN A	10.129.1.35
+wsus.internal.inlanefreight.htb. 604800	IN A	10.129.18.2
+internal.inlanefreight.htb. 604800 IN	SOA	inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+;; Query time: 93 msec
+;; SERVER: 10.129.3.15#53(10.129.3.15) (TCP)
+;; WHEN: Thu Sep 21 17:58:33 WEST 2023
+;; XFR size: 15 records (messages 1, bytes 677)
+
+
+Identify if its possible to perform a zone transfer and submit the TXT record as the answer. (Format: HTB{...)) : HTB{DN5_z0N3_7r4N5F3r_iskdufhcnlu34}
+
+
+What is the IPv4 address of the hostname DC1? 10.129.34.16
+
+$ cat domains_found.txt
+
+app.inlanefreight.htb
+dev.inlanefreight.htb
+mail1.inlanefreight.htb
+ns.inlanefreight.htb
+
+
+$ for dom in $(cat ~/domains_found.txt); do dnsenum --dnsserver 10.129.3.15 --enum -p 0 -s 0 -o subdomains.txt -f ~/SecLists/Discovery/DNS/fierce-hostlist.txt $dom;done
+
+-----   dev.inlanefreight.htb   -----
+
+
+Host's addresses:
+__________________
+
+
+
+Name Servers:
+______________
+
+ns.inlanefreight.htb.                    604800   IN    A         127.0.0.1
+
+
+Mail (MX) Servers:
+___________________
+
+
+
+Trying Zone Transfers and getting Bind Versions:
+_________________________________________________
+
+unresolvable name: ns.inlanefreight.htb at /usr/bin/dnsenum line 900 thread 2.
+
+Trying Zone Transfer for dev.inlanefreight.htb on ns.inlanefreight.htb ... 
+AXFR record query failed: no nameservers
+
+
+Brute forcing with /home/w0rth/SecLists/Discovery/DNS/fierce-hostlist.txt:
+___________________________________________________________________________
+
+dev1.dev.inlanefreight.htb.              604800   IN    A         10.12.3.6
+ns.dev.inlanefreight.htb.                604800   IN    A         127.0.0.1
+win2k.dev.inlanefreight.htb.             604800   IN    A        10.12.3.203
+
+
+win2k.dev.inlanefreight.htb
+```
