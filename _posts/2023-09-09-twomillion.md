@@ -1,6 +1,6 @@
 ---
 layout: post
-title: TwoMillion
+title: TwoMillion - Hackthebox
 categories:
 - Writeups
 - Hackthebox
@@ -12,6 +12,7 @@ tags:
 - spool
 - OverlayFS
 - mysql
+- CVE-2023-0386
 img_path: "/assets/img/twomillion"
 image:
   path: machine_img.png
