@@ -22,7 +22,7 @@ image:
   alt: pilgrimage
 ---
 
-Pilgrimage is a hackthebox machine that has a website to shrink images. Running gobuster we found a git repostory and we extract all the code used in the website. Inside the retrieved repostiroy we have a binary called magick that is used to shrink images, however it has a vulnerable version. The version in question has a Local File Inclusion vulnerability that allows the attackers to read files. After reading a sqlite database file we get ssh credentials. Inside the system we found a script that analyses the files submitted in the website for malware. However the script use a vulnerable version of binwalk which gives us a shell as root. 
+Pilgrimage is a hackthebox machine that has a website to shrink images. Running gobuster we found a git repository and we extract all the code used in the website. Inside the retrieved repository we have a binary called magick that is used to shrink images, however it has a vulnerable version. The version in question has a Local File Inclusion vulnerability that allows the attackers to read files. After reading a sqlite database file we get ssh credentials. Inside the system we found a script that analyses the files submitted in the website for malware. However the script use a vulnerable version of binwalk which gives us a shell as root. 
 
 ## Recon
 
