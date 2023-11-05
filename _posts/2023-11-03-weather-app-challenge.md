@@ -21,6 +21,7 @@ We have three main endpoints:
  - /register
  - /login
 
+
 Looking at the challenge code it seems like the task is to create a account as the user admin and login.
 
 ```js
