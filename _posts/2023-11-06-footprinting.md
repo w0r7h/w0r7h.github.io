@@ -529,6 +529,9 @@ For NFS, NMAP has a couple NSE scripts too, which we can use to gather more info
 If the root_squash config is set, we cannot edit the files even as root.
 - Unmount NFS share: `sudo umount ./target-NFS`
 
+In case we want to get the files with data only do: `ls -laSr`
+In case we want to copy files to the clipboard from the terminal use: `xclip -sel c < input_file`
+
 ### HTB Challenge
 
 ```shell
@@ -745,7 +748,7 @@ This is because the machine was a Linux machine instead of windows and the paths
 
 ## IMAP and POP3
 
-By default, ports **110**, **143**, **993**, and **995** are used for IMAP and POP3. 
+By default, TCP ports **110**, **143**, **993**, and **995** are used for IMAP and POP3. 
 
 ### IMAP
 
@@ -768,17 +771,16 @@ By default, ports **110**, **143**, **993**, and **995** are used for IMAP and P
 
 | Command                       | Description                                                                                               |
 |-------------------------------|-----------------------------------------------------------------------------------------------------------|
-| 1 LOGIN username password     | User's login.                                                                                             |
-| 1 LIST "" *                   | Lists all directories.                                                                                    |
-| 1 CREATE "INBOX"              | Creates a mailbox with a specified name.                                                                  |
-| 1 DELETE "INBOX"              | Deletes a mailbox.                                                                                        |
-| 1 RENAME "ToRead" "Important" | Renames a mailbox.                                                                                        |
-| 1 LSUB "" *                   | Returns a subset of names from the set of names that the User has declared as being active or subscribed. |
-| 1 SELECT INBOX                | Selects a mailbox so that messages in the mailbox can be accessed.                                        |
-| 1 UNSELECT INBOX              | Exits the selected mailbox.                                                                               |
-| 1 FETCH <ID> all              | Retrieves data associated with a message in the mailbox.                                                  |
-| 1 CLOSE                       | Removes all messages with the Deleted flag set.                                                           |
-| 1 LOGOUT                      | Closes the connection with the IMAP server.                                                               |
+| USER uid                      | Log in as "uid"                                                                                           |
+| PASS password                 | Substitue "password" for your actual password                                                             |
+| STAT                          | List number of messages, total mailbox size                                                               |
+| LIST                          | List messages and sizes.                                                                                  |
+| RETR n                        | Show message n                                                                                            |
+| DELE n                        | Mark message n for deletion                                                                               |
+| RSET                          | Undo any changes                                                                                          |
+| QUIT                          | Logout (expunges messages if no RSET)                                                                     |
+| TOP msg n                     | Show first n lines of message number msg                                                                  |
+| CAPA                          | Get capabilities                                                                                          |
 
 
 ### Dangerous Settings
@@ -805,7 +807,8 @@ By default, ports **110**, **143**, **993**, and **995** are used for IMAP and P
 
 ## SNMP
 
-By default, ports **161** and **162** are used for SNMP.
+By default, UDP ports **161** and **162** are used for SNMP.
+When the machine is related to management it is always nice to scan for this service however we need to use `sudo nmap -sU` since the ports use UDP.
 
 ### SNMPv1
 
