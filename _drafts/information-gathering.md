@@ -1,9 +1,7 @@
 ---
 layout: post
 title: Information Gathering
-date: 2023-11-09 18:38 +0000
 ---
-
 ## Information Gathering
 
 During this process, our objective is to identify as much information as we can from the following areas:
@@ -128,8 +126,87 @@ export PORT="443"
 openssl s_client -ign_eof 2>/dev/null <<<$'HEAD / HTTP/1.0\r\n\r' -connect "${TARGET}:${PORT}" | openssl x509 -noout -text -in - | grep 'DNS' | sed -e 's|DNS:|\n|g' -e 's|^\*.*||g' | tr -d ',' | sort -u
 ```
 
-To automate all the process of finding subdomains, IP addresses, URLs, emails and names we can use a tool called [TheHarvester](https://github.com/laramies/theHarvester). This tool uses modules as sources to get information from a target domain.
+### TheHarvester
 
+To automate all the process of finding subdomains, IP addresses, URLs, emails and names we can use a tool called [TheHarvester](https://github.com/laramies/theHarvester). This tool uses modules as sources to get information from a target domain, the most used modules are:
 
+| Baidu        | Baidu search engine.                                                             |
+|--------------|----------------------------------------------------------------------------------|
+| Bufferoverun | Uses data from Rapid7's Project Sonar - www.rapid7.com/research/project-sonar/   |
+| Crtsh        | Comodo Certificate search.                                                       |
+| Hackertarget | Online vulnerability scanners and network intelligence to help organizations.    |
+| Otx          | AlienVault Open Threat Exchange - https://otx.alienvault.com                     |
+| Rapiddns     | DNS query tool, which makes querying subdomains or sites using the same IP easy. |
+| Sublist3r    | Fast subdomains enumeration tool for penetration testers                         |
+| Threatcrowd  | Open source threat intelligence.                                                 |
+| Threatminer  | Data mining for threat intelligence.                                             |
+| Trello       | Search Trello boards (Uses Google search)                                        |
+| Urlscan      | A sandbox for the web that is a URL and website scanner.                         |
+| Vhost        | Bing virtual hosts search.                                                       |
+| Virustotal   | Domain search.                                                                   |
+| Zoomeye      | A Chinese version of Shodan.                                                     |
 
+We add them in a list:
+
+```
+$ cat sources.txt
+
+baidu
+bufferoverun
+crtsh
+hackertarget
+otx
+projecdiscovery
+rapiddns
+sublist3r
+threatcrowd
+trello
+urlscan
+vhost
+virustotal
+zoomeye
+```
+
+An then run harvester against the list: `cat sources.txt | while read source; do theHarvester -d "${TARGET}" -b $source -f "${source}_${TARGET}";done`
+We can extract all the subdomains: `cat *.json | jq -r '.hosts[]' 2>/dev/null | cut -d':' -f 1 | sort -u > "${TARGET}_theHarvester.txt"`
+And merge all the information: 
+
+```shell
+cat ${TARGET}_*.txt | sort -u > ${TARGET}_subdomains_passive.txt
+cat ${TARGET}_subdomains_passive.txt | wc -l
+```
+
+## Passive Infrastructure Identification
+
+### Netcraft
+
+To obtain information about the server without interacting with them we can use [netcraft](https://www.netcraft.com/).
+We can the service like: https://sitereport.netcraft.com/?url=https%3A%2F%2Ffacebook.com to obtain information about the domain facebook.com.
+Some interesting details we can observe from the report are:
+
+| Background      | General information about the domain, including the date it was first seen by Netcraft crawlers. |
+|-----------------|--------------------------------------------------------------------------------------------------|
+| Network         | Information about the netblock owner, hosting company, nameservers, etc.                         |
+| Hosting history | Latest IPs used, webserver, and target OS.                                                       |
+
+**We need to pay special attention to the latest IPs used. Sometimes we can spot the actual IP address from the webserver before it was placed behind a load balancer, web application firewall, or IDS, allowing us to connect directly to it if the configuration allows it. This kind of technology could interfere with or alter our future testing activities.**
+
+### Wayback Machine
+
+We can access several versions of these websites using the Wayback Machine to find old versions that may have interesting comments in the source code or files that should not be there. This tool can be used to find older versions of a website at a point in time. Let's take a website running WordPress, for example. We may not find anything interesting while assessing it using manual methods and automated tools, so we search for it using Wayback Machine and find a version that utilizes a specific (now vulnerable) plugin. Heading back to the current version of the site, we find that the plugin was not removed properly and can still be accessed via the wp-content directory. We can then utilize it to gain remote code execution on the host and a nice bounty.
+
+We can also use the tool [waybackurls](https://github.com/tomnomnom/waybackurls) to inspect URLs saved by Wayback Machine and look for specific keywords. We can use the tool as follows: `waybackurls -dates https://facebook.com > waybackurls.txt`.
+
+## Active Infrastructure Identification
+
+When dealing with web applications, there are always web servers serving the application. Some of the most popular are Apache, Nginx, and Microsoft IIS, among others.
+In some cases we can discover the target OS running the application by the version of the web server. In windows, the Microsoft IIS version is directly mapped to a windows server version, This is because, they are installed by default.  Some default installations are:
+
+1. IIS 6.0: Windows Server 2003
+2. IIS 7.0-8.5: Windows Server 2008 / Windows Server 2008R2
+3. IIS 10.0 (v1607-v1709): Windows Server 2016
+4. IIS 10.0 (v1809-): Windows Server 2019  
+
+When dealing with linux, we can't infer what is the OS version by the apache or nginx version that it is running.
+The first thing we can do to identify the webserver version is to look at the response headers.
 
