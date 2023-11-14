@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Information Gathering
+date: 2023-11-14 16:15 +0000
 ---
 ## Information Gathering
 
@@ -347,6 +348,3 @@ The next step we combine everything:
 `ffuf -w ./folders.txt:FOLDERS,./wordlist.txt:WORDLIST,./extensions.txt:EXTENSIONS -u http://192.168.10.10/FOLDERS/WORDLISTEXTENSIONS`
 
 where folders.txt are the folders we have found using the first command of ffuf, wordlist.txt the extracted words from cewl and extensions a list of extensions that we can found in SecList.
-
-
-Source: HTB Academy
