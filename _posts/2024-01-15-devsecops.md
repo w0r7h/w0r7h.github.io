@@ -44,3 +44,4 @@ Visibility and Transparency: For every tool being introduced or practiced, there
 
 Account for flexibility thanks to understanding and empathy:  There is a factor that can determine success: the level of understanding and empathy. It is essential to understand how developers/engineers work, what they know to be a risk, and what they prioritize. If you know their perspective, it's easier to build a process that finds common ground and has a higher chance to work vs adding another tool that creates more noise and stress for everyone.
 
+Reference: Tryahackme room "Introduction to DevSecOps"
