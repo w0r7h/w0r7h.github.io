@@ -49,6 +49,19 @@ bundle exec jekyll server
 
 Please see the [theme's docs](https://github.com/cotes2020/jekyll-theme-chirpy#documentation).
 
+## Errors Pipeline
+
+In the setup ruby step we get: `An error occurred while installing google-protobuf (3.25.2), and Bundler cannot
+continue.`. Fix update to rube 3.2: 
+
+```
+- name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2   # reads from a '.ruby-version' or '.tools-version' file if 'ruby-version' is omitted
+          bundler-cache: true
+```
+
 ## License
 
 This work is published under [MIT][mit] License.
